@@ -1,3 +1,6 @@
+from conf import _snake_case,common,customize
+
+
 def get_columns_name(db, database_name, table_name):
     with db.cursor() as cur:
         cur.execute(
@@ -11,6 +14,23 @@ def get_columns_name(db, database_name, table_name):
 def compare_columns(dump_data, sql_cols):
     return set(dump_data.keys()) - sql_cols 
 
+
+def handle_columns_name(file_name, mongo_data):
+    ignore_columns = customize.get(file_name, {}).get("ignore_columns", {}).get(
+        "name", []
+    )
+    ignore_columns.extend(common.get("ignore_columns", {}).get("type", []))
+
+    data = {}
+    for key in mongo_data.keys():
+        if key in ignore_columns:
+            continue
+
+        name = customize.get(file_name, {}).get("columns", {}).get(key, {}).get(
+            "name", _snake_case(key)
+        )
+        data[name] = mongo_data[key]
+    return data
 
 
 

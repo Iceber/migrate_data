@@ -1,6 +1,7 @@
 import pymysql
 import re
 
+
 host = "localhost"
 user = "root"
 password = "root"

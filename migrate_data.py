@@ -2,60 +2,22 @@ import ijson
 import pymysql
 import functools
 import logging
-import re
-import yaml
 import json
 import datetime
 
 import compare_type as ct
 import compare_columns as cc
 
-yaml_path = ""
 user = "root"
 password = "root"
 host = "localhost"
 database = "test"
-
-
-with open(yaml_path) as f:
-    config = yaml.load(f.read())
-
-first_cap_re = re.compile("(.)([A-Z][a-z]+)")
-all_cap_re = re.compile("([a-z0-9])([A-Z])")
-
-
-def _snake_case(name):
-    s1 = first_cap_re.sub(r"\1_\2", name)
-    return all_cap_re.sub(r"\1_\2", s1).lower()
-
-
-common = config["common"]
-customize = config["customize"]
-
 
 def handle_table_name(file_name):
     table_name = customize.get(file_name, {}).get(
         "table_name", _snake_case(file_name) + "s"
     )
     return table_name
-
-
-def handle_columns_name(file_name, mongo_data):
-    ignore_columns = customize.get(file_name, {}).get("ignore_columns", {}).get(
-        "name", []
-    )
-    ignore_columns.extend(common.get("ignore_columns", {}).get("type", []))
-
-    data = {}
-    for key in mongo_data.keys():
-        if key in ignore_columns:
-            continue
-
-        name = customize.get(file_name, {}).get("columns", {}).get(key, {}).get(
-            "name", _snake_case(key)
-        )
-        data[name] = mongo_data[key]
-    return data
 
 
 def _to_json(column_data):
@@ -110,7 +72,7 @@ def migrate_data(db, database, file_name):
         error_inserts_data = []
 
         for row in rows:
-            row = handle_columns_name(row)
+            row = cc.handle_columns_name(row)
             handle_data_type(row)
             diff_column = cc.compare_column(row, sql_cols)
             if diff_column:
