@@ -48,7 +48,6 @@ def handle_data(data, sql_columns):
 
     diff_columns = []
     for column_name, column_type in sql_columns.items():
-#        print(column_name,':',column_type)
         if column_type == "json":
             data[column_name] = _to_json(data[column_name])
         elif column_type == "datetime":
@@ -61,20 +60,3 @@ def handle_data(data, sql_columns):
             diff_columns.append(column_name)
 
     return diff_columns
-
-
-"""
-def test():
-
-    mongo_data = {"id": 10, "min": 256 ** 16, "test_string": "343434343"}
-    sql_type = (("id", "int(32)"), ("min", "int(16)"), ("test_string", "varchar(5)"))
-
-    change_column = compare_type(mongo_data, sql_type)
-
-    if change_column:
-        print(change_column)
-
-
-if __name__ == "__main__":
-    test()
-"""

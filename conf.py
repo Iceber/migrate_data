@@ -26,7 +26,7 @@ def _handle_sql_columns(col):
     col.pop('id')
     return col
 
-def get_columns(db, database_name, table_name):
+def get_columns_type(db, database_name, table_name):
     with db.cursor() as cur:
         cur.execute(
             "select  column_name,column_type from information_schema.columns where table_schema =%s  \

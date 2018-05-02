@@ -3,11 +3,11 @@ import pymysql
 import functools
 import logging
 import json
-import os.path
+from os.path import basename,splitext
 import copy
 from handle_type import handle_data
 from handle_columns import translate_columns_name, handle_columns
-from conf import translate_table_name, get_columns, get_columns_info
+from conf import translate_table_name, get_columns_type, get_columns_info
 
 
 user = "root"
@@ -36,16 +36,16 @@ def _retry(f):
     return _f
 
 @_retry
-def insert_data(db, sql):
+def insert_data(db, sql,values):
     with db.cursor() as cur:
-        cur.execute(sql)
+        cur.execute(sql,values)
     return True
 
 
 def migrate_data(path_name,db = db,database = database):
-    file_name = os.path.basename(path_name)
+    file_name = splitext(basename(path_name))[0]
     table_name = translate_table_name(file_name)
-    col_type = get_columns(db, database, table_name)
+    col_type = get_columns_type(db, database, table_name)
     col_info = get_columns_info(db,database, table_name)
 
     with open(path_name+'.json') as f:
@@ -73,12 +73,11 @@ def migrate_data(path_name,db = db,database = database):
                 diff_type_data[str(row)] = diff_type
                 continue
 
-            sql = "INSERT INTO {0}({1}) VALUES {2};".format(
-                table_name, ','.join(row.keys()), tuple(row.values())
+            sql = "INSERT INTO {0}({1}) VALUES ({2});".format(
+                table_name, ','.join(row.keys()), ','.join('?'*len(row))
             )
-            print(sql)
             try:
-                insert_data(db, sql)
+                insert_data(db, sql,tuple(row.values()))
             except:
                 logging.error(f"[insert fail] {row}")
                 error_inserts_data.append(row)
@@ -89,12 +88,7 @@ def migrate_data(path_name,db = db,database = database):
     return (diff_column_data, diff_type_data, error_inserts_data)
 
 
-def test():
 
-    db = pymysql.connect(host=host, user=user, password=password, db=database)
-    diff_columns_data, diff_type_data, error_inserts = migrate_data(db, table)
-
-    db.close()
 
 if __name__ == "__main__":
 

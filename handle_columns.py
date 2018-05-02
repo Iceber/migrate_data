@@ -38,29 +38,3 @@ def translate_columns_name(file_name, mongo_data):
 
     return data
 
-
-"""
-def _dump_compare(dump_items, sql_cols):
-    for item in dump_items:
-        diff_key = columns_compare(item, sql_cols)
-        if diff_key:
-            print(diff_key)
-            yield item
-
-def test(dump_name, table_name, database_name=database):
-    import pymysql
-    import ijson
-
-    db = pymysql.connect(host=host, user=user, password=password, db=database)
-    sql_cols = get_columns_name(database_name, table_name)
-
-
-    with open(dump_name) as f:
-        dump_items = ijson.items(f, "results")
-        for item in _dump_compare(dump_items, sql_cols):
-            print(item)
-
-
-if __name__ == "__main__":
-    test("Activity_all.json", "ok")
-"""
