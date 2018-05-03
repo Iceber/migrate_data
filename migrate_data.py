@@ -14,7 +14,7 @@ from conf import translate_table_name, get_columns_type, get_columns_info,\
 user = "root"
 password = "root"
 host = "localhost"
-database = "test"
+database = "t"
 
 db = pymysql.connect(user=user, password=password, host=host, database=database)
 
@@ -45,14 +45,17 @@ def migrate_data(file_name,db = db,database = database):
         diff_column_data = {}
         diff_type_data = {}
         error_inserts_data = []
+
         test_diff_columns = set()
         fail = 0
         total = 0
+
         print('start')
         for row in rows:
             sql_cols = copy.deepcopy(col_type)
             row = translate_columns_name(file_name, row)
             diff_columns = handle_columns(row, col_info, col_type, sql_cols)
+
             total += 1
             if diff_columns:
                 test_diff_columns |= diff_columns

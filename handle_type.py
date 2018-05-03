@@ -22,6 +22,13 @@ def _int_compare(int_data, int_type):
 
     return True
 
+def _compare_type(data, column_type):
+    if "int" in column_type:
+        return _int_compare(data, column_type)
+
+    elif "char" in column_type:
+        return _str_compare(data, column_type)
+    return True
 
 def _to_json(column_data):
     return json.dumps(column_data)
@@ -36,13 +43,6 @@ def _to_datetime(column_data):
 def _pointer_to_char(column_data):
     return column_data["objectId"] 
 
-def _compare_type(data, column_type):
-    if "int" in column_type:
-        return _int_compare(data, column_type)
-
-    elif "char" in column_type:
-        return _str_compare(data, column_type)
-    return True
 
 def handle_data(data, sql_columns):
 
