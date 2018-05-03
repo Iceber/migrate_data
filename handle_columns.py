@@ -1,24 +1,6 @@
-from conf import _snake_case, common, customize
-
-
-
-def handle_columns(mongo_data,columns_info,columns):
-    mongo_cols_only = set(mongo_data.keys()) - set(columns_info.keys())
-    if mongo_cols_only:
-        print("mongo data more than sql",mongo_cols_only,'\n',mongo_data.keys(),columns_info.keys())
-        return set()
-    sql_cols_only = set(columns_info.keys())-set(mongo_data.keys())
-    null_columns = set()
-    if sql_cols_only:
-        for col in sql_cols_only:
-            if any(columns_info[col]):
-                columns.pop(col)
-                continue
-            null_columns.add(col)
-    
-    return null_columns
-                    
-            
+from conf import _snake_case,\
+        common, customize,\
+        type_default_value, dump_schema_dir,dump_data_file as file_name
 
 def translate_columns_name(file_name, mongo_data):
     ignore_columns = customize.get(file_name, {}).get("ignore_columns", {}).get(
@@ -37,4 +19,41 @@ def translate_columns_name(file_name, mongo_data):
         data[name] = mongo_data[key]
 
     return data
+
+
+def _get_columns_default(columns_attr_file):
+    import json,os.path
+    with open(os.path.join(dump_schema_dir,columns_attr_file +'_all.json')) as f:
+        columns_attr = json.load(f)["schema"]
+    columns_default = {}
+    for name, attr in columns_attr.items():
+        if "default"  in attr:
+            columns_default[name] = attr["default"]
+    return translate_columns_name(columns_attr_file, columns_default)
+
+columns_default = _get_columns_default(file_name)
+              
+def handle_columns(mongo_data,columns_info,columns_type,columns):
+    mongo_cols_only = set(mongo_data.keys()) - set(columns_info.keys())
+    if mongo_cols_only:
+        print("mongo data more than sql",mongo_cols_only,'\n',mongo_data.keys(),columns_info.keys())
+        return set()
+    sql_cols_only = set(columns_info.keys())-set(mongo_data.keys())
+    null_columns = set()
+    if sql_cols_only:
+        for col in sql_cols_only:
+            if col in columns_default:
+                mongo_data[col] = columns_default[col]
+            elif "int" in columns_type[col]:
+                mongo_data[col] = type_default_value["int"]
+            elif "float" == columns_type[col]:
+                mongo_data[col] = type_default_value["float"]
+            elif "varchar" in columns_type[col]:
+                mongo_data[col] = type_default_value["varchar"]
+            elif any(columns_info[col]):
+                columns.pop(col)
+            else:
+                null_columns.add(col)
+    
+    return null_columns
 

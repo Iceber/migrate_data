@@ -1,6 +1,19 @@
 import re
 import yaml
+
 yaml_path = "/home/pybeef/workspace/leancloud-backup/gen_schema_config.yml"
+
+dump_schema_dir = "/home/pybeef/workspace/data/"
+dump_data_dir = '/home/pybeef/workspace/dump_data/'
+dump_data_file = 'OutboundCall'
+
+
+type_default_value = {
+    'int' : 0,
+    'float':0,
+    'varchar':'',
+}
+
 
 with open(yaml_path) as f:
     config = yaml.load(f.read())
@@ -45,6 +58,5 @@ def get_columns_info(db,database_name, table_name):
             (database_name, table_name)
         )
         col = cur.fetchall()
-    info = {name:(nullable == 'YES', default != "NULL") for name, nullable, default in col}
-     
+    info = {name:(nullable == 'YES', default) for name, nullable, default in col}
     return _handle_sql_columns(info)

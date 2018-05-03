@@ -55,7 +55,8 @@ def handle_data(data, sql_columns):
         elif column_type == "char(24)":
             if isinstance(data[column_name], dict):
                 data[column_name] = _pointer_to_char(data[column_name])
-
+        elif "int" in column_type and "tinyint" not in column_type:
+            data[column_name] = int(data[column_name])
         if not _compare_type(data[column_name], column_type):
             diff_columns.append(column_name)
 
