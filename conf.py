@@ -5,7 +5,7 @@ yaml_path = "/home/pybeef/workspace/leancloud-backup/gen_schema_config.yml"
 
 dump_schema_dir = "/home/pybeef/workspace/data/"
 dump_data_dir = '/home/pybeef/workspace/dump_data/'
-dump_data_file = 'OutboundCall'
+dump_data_file = 'Cow'
 
 
 type_default_value = {
@@ -19,6 +19,7 @@ with open(yaml_path) as f:
     config = yaml.load(f.read())
 common = config["common"]
 customize = config["customize"]
+ignore_tables = config["ignore_tables"]
 
 first_cap_re = re.compile("(.)([A-Z][a-z]+)")
 all_cap_re = re.compile("([a-z0-9])([A-Z])")
@@ -36,7 +37,7 @@ def translate_table_name(file_name):
     return table_name
 
 def _handle_sql_columns(col):
-    col.pop('id')
+    col.pop('id','')
     return col
 
 def get_columns_type(db, database_name, table_name):
