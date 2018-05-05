@@ -1,6 +1,6 @@
 import re
 import json
-
+from decimal import Decimal
 
 def _str_compare(str_data, str_type):
     str_len = re.findall("\d+", str_type)
@@ -28,7 +28,7 @@ def _compare_type(data, column_type):
         return _int_compare(data, column_type)
 
     elif "char" in column_type:
-        return _str_compare(data, column_type)
+        return _str_compare(str(data), column_type)
 
     return True
 
@@ -58,6 +58,8 @@ def handle_data(data, sql_columns):
         elif column_type == "char(24)":
             if isinstance(data[column_name], dict):
                 data[column_name] = _pointer_to_char(data[column_name])
+        elif column_type == "decimal(12,2)":
+            data[column_name] = float(data[column_name])
         elif "int" in column_type and "tinyint" not in column_type:
             data[column_name] = int(data[column_name])
         if not _compare_type(data[column_name], column_type):

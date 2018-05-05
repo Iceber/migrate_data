@@ -12,6 +12,7 @@ type_default_value = {
     'int' : 0,
     'float':0,
     'varchar':'',
+    'json':[],
 }
 
 
@@ -59,5 +60,4 @@ def get_columns_info(db,database_name, table_name):
             (database_name, table_name)
         )
         col = cur.fetchall()
-    info = {name:(nullable == 'YES', default) for name, nullable, default in col}
-    return _handle_sql_columns(info)
+    return _handle_sql_columns({name:(nullable == 'YES', default) for name, nullable, default in col})

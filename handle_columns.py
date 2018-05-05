@@ -12,6 +12,7 @@ def translate_columns_name(file_name, mongo_data):
     ignore_columns = customize.get(file_name, {}).get("ignore_columns", {}).get(
         "name", []
     )
+
     ignore_columns.extend(common.get("ignore_columns", {}).get("type", []))
 
     data = {}
@@ -55,14 +56,8 @@ def _get_columns_default(columns_attr_file):
 def handle_columns(mongo_data, columns_info, columns_type, columns, columns_default):
     mongo_cols_only = set(mongo_data.keys()) - set(columns_info.keys())
     if mongo_cols_only:
-        print(
-            "mongo data more than sql",
-            mongo_cols_only,
-            "\n",
-            mongo_data.keys(),
-            columns_info.keys(),
-        )
-        return set()
+
+        return ('more_columns',mongo_cols_only)
 
     sql_cols_only = set(columns_info.keys()) - set(mongo_data.keys())
     null_columns = set()
@@ -76,9 +71,11 @@ def handle_columns(mongo_data, columns_info, columns_type, columns, columns_defa
                 mongo_data[col] = type_default_value["float"]
             elif "varchar" in columns_type[col]:
                 mongo_data[col] = type_default_value["varchar"]
+            elif columns_type[col]:
+                mongo_data[col] = type_default_value["json"]
             elif any(columns_info[col]):
                 columns.pop(col)
             else:
                 null_columns.add(col)
 
-    return null_columns
+    return ('diff_columns',null_columns)
