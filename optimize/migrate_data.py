@@ -2,7 +2,17 @@ from mongodb import MongoTable
 from columns import Columns_info
 
 
-def migrate_data(rows):
+class Args():
+    def __init__(self):
+        self.config = ""
+        self.table = ""
+        self.dir = ""
+        self.data_dir = ""
+        self.error_dir = ""
+
+args = Args()
+
+def migrate_data(args):
     with open(args.config) as f:
         config = yaml.load(f.read())
     ignore_tables = config.get("ignore_tables",[])
@@ -15,7 +25,8 @@ def migrate_data(rows):
             
             columns_info = Columns_info(config["common"],config.get("customize",{}).get(t.name,{}))
             columns_info = columns_info(t)
-
+            
+            
     elif args.table in ignore_tables:
         print()
     else:

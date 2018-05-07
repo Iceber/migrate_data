@@ -210,7 +210,7 @@ def testcc():
             init(file_name)
             test()
         except:
-            s = "Bad: " + file_name + "\ndiff_columns:\n" + diff_columns + "\ndiff_types: \n" + diff_types
+            s = "Bad: " + file_name + "\ndiff_columns:\n" + str(diff_columns) + "\ndiff_types: \n" + str(diff_types)
             diff_info_fp.write(s)
             diff_info_fp.flush()
 
