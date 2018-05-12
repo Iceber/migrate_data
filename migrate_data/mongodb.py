@@ -28,6 +28,10 @@ class MongoTable(object):
         pattern = os.path.join(dir, "*" + suffix)
         for p in glob.glob(pattern):
             yield cls(p, suffix)
+            
+    @classmethod
+    def get_table(cls, p,suffix="_all.json"):
+        return cls(p,suffix)
 
     def map_columns(self, f):
         return map(lambda kv: f(*kv), self.schema.items())

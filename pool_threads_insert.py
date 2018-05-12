@@ -76,7 +76,7 @@ class Exec_db:
         """
         try:
             conn=self.pool.get()
-            cursor=conn.cursor(cursor=pymysql.cursors.DictCursor)
+            cursor=conn.cursor()
             response=cursor.executemany(sql,operation) if operation else cursor.executemany(sql)
         except Exception as e:
             print(e)
@@ -91,12 +91,16 @@ class Exec_db:
         for i in range(self.maxconn):
             self.pool.get().close()
 
-obj=Exec_db.get_instance(host="localhost",user="root",passwd="root",db="t",charset="utf8",maxconn=10)
+obj=Exec_db.get_instance(host="localhost",user="root",passwd="root",db="t",maxconn=10)
 
 def test_func(num):
-    data=(("男",i,"张小凡%s" %i) for i in range(num))
-    sql="insert into tb1(gender,class_id,sname) values(%s,%s,%s)"
+#    data=(("男",i,"张小凡%s" %i) for i in range(num))
+#    sql="insert into tb1(gender,class_id,sname) values(%s,%s,%s)"
+    s = time.time()
+    data = (("Conn_Pool_Test", i, "C%s" % i) for i in range(num))
+    sql = "insert into tb1(title,count,st) values(%s,%s,%s)"
     print(obj.exec_sql_many(sql,data))
+    print(time.time()-s)
 
 job_list=[]
 for i in range(10):
