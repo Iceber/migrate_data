@@ -1,40 +1,13 @@
-import re
-import copy
-from .sql import Transformer
+from .sql import BaseTransformer
 
-
-class TableInfo(object):
-
-    def __init__(self, table_name, ignore_columns, columns):
-        self.table_name = table_name
-        self.ignore_columns = ignore_columns
-        self.columns = columns
-
-    @classmethod
-    def from_mongodb(cls, t, config):
-        trans = InfoTransformer(
-            common=config["common"],
-            customize=config.get("customize", {}).get(t.name, {}),
-        )
-        return cls(**trans(t))
-    @staticmethod
-    def gen_table_info(t, config):
-        tarns = InforTransformer(
-            common = config["common"],
-            customize = config.get("cutomize",{}).get(t.name, {}),
-        )
-        return trans(t)
-
-
-class InfoTransformer(Transformer):
-    customize_default = {"INT": 0, "FLOAT": 0.0, "VARCHAR": "","TEXT": ""}
+class TableInfo(BaseTransformer):
 
     def __call__(self, table):
         name = self.config.get("table_name", self.snake_case(table.name) + "s")
         self.ignore_columns = self.config["ignore_columns"].get("name", [])
         columns = self.get_columns(table)
         return {
-            "table_name": name,
+            "name": name,
             "ignore_columns": self.ignore_columns,
             "columns": columns,
         }
@@ -51,24 +24,22 @@ class InfoTransformer(Transformer):
             dtype = self.config.get("type_mapping_by_name", {}).get(cn) or dtype
             return dtype
 
-        def _get_customize_default(ctype):
-            for t, v in self.customize_default.items():
+        def _get_migration_default(cn, ctype):
+            dvalue = None
+            for t, v in self.config.get("default_value_mapping",{}).items():
                 if t in ctype:
-                    return v
+                    dvalue = v
+            dvalue = self.config.get("default_value_mapping_by_name",{}).get(cn, dvalue)
+            return _config.get(cn, {}).get("default_value",{}).get(cn, dvalue)
+            
 
-        def _get_default_value(ci, ctype):
+        def _get_default_value(cn, ci, ctype):
             dvalue = ci.get("default")
-            if dvalue is not None:
-                if dvalue:
-                    return dvalue
-
-                else:
-                    return dvalue if not isinstance(dvalue, dict) else (
-                        dvalue.get("iso") or dvalue.get("objectId")
-                    )
-
-            else:
-                return _get_customize_default(ctype)
+            if dvalue == None:
+                return _get_migration_default(cn,ctype)
+            return dvalue if not isinstance(dvalue, dict) else (
+                   dvalue.get("iso") or dvalue.get("objectId")
+                )
 
         def _get_default_args(ci):
             args = self.config.get("common_column_args", {}).get("default", [])
@@ -88,7 +59,7 @@ class InfoTransformer(Transformer):
             col = {
                 "name": __config.get("name") or _get_default_name(col_name, col_info),
                 "type": ctype,
-                "default": _get_default_value(col_info, ctype),
+                "default": _get_default_value(col_name, col_info, ctype),
                 "nullable": "NOT NULL" not in __config.get(
                     "rewrite_extra",
                     _get_default_args(col_info) + __config.get("extra", []),

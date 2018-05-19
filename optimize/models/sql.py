@@ -34,7 +34,7 @@ class SQLTable(object):
         return j2_render("schema.j2", table=self)
 
 
-class Transformer(object):
+class BaseTransformer():
     first_cap_re = re.compile("(.)([A-Z][a-z]+)")
     all_cap_re = re.compile("([a-z0-9])([A-Z])")
 
@@ -47,13 +47,15 @@ class Transformer(object):
         """ref: https://gist.github.com/angstwad/bf22d1822c38a92ec0a9"""
         for k, v in customize.items():
             if k in config and isinstance(config[k], dict):
-                Transformer.merge_config(config[k], customize[k])
+                BaseTransformer.merge_config(config[k], customize[k])
             else:
                 config[k] = customize[k]
 
     def __init__(self, common, customize):
         self.config = copy.deepcopy(common)
         self.merge_config(self.config, customize)
+
+class Transformer(BaseTransformer):
 
     def __call__(self, table):
         name = self.config.get("table_name", self.snake_case(table.name) + "s")

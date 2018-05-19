@@ -92,14 +92,16 @@ class Exec_db:
             self.pool.get().close()
 
 obj=Exec_db.get_instance(host="localhost",user="root",passwd="root",db="t",maxconn=10)
-
+total = 0
 def test_func(num):
+    global total
 #    data=(("男",i,"张小凡%s" %i) for i in range(num))
 #    sql="insert into tb1(gender,class_id,sname) values(%s,%s,%s)"
     s = time.time()
+    
     data = (("Conn_Pool_Test", i, "C%s" % i) for i in range(num))
     sql = "insert into tb1(title,count,st) values(%s,%s,%s)"
-    print(obj.exec_sql_many(sql,data))
+    obj.exec_sql_many(sql,data)
     print(time.time()-s)
 
 job_list=[]

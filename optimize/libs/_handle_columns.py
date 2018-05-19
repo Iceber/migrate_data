@@ -2,6 +2,12 @@ import re
 import json
 
 
+def filter_columns(mongo_data, ignore_columns):
+    
+    for i in ignore_columns:
+        mongo_data.pop(i, "")
+        
+
 def handle_columns(mongo_data, columns):
 
     def _fill_short_columns(mongo_data):
@@ -130,3 +136,5 @@ def handle_data(data, columns):
         return {"fault_types":fault_types}
 
     return _handle(data, columns)
+
+
