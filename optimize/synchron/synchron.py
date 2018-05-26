@@ -29,8 +29,8 @@ async def table_poll(table_name):
                 table_name, copy.deepcopy(table_info), table_poll_info, conn
             )
         except Exception:
+            print("[Error] ")
             
-            continue
 
         table_info["last_time"], table_info["time_interval"] = last_time, time_interval
         await asyncio.sleep(table_poll_info["time_interval"] * 60)
@@ -48,7 +48,7 @@ def main(args):
         loop.run_forever()
     except Exception:
         # storge table_poll_info
-        # 程序可能会人工停止(Ctrl-C),需要对一些信息做一些存储处理
+        # 程序可能会人工停止(Ctrl-C),需要对一些信息做存储处理
         storage_tables_poll_info(tables_poll_info)
 
         return None

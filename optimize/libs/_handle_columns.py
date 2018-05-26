@@ -1,7 +1,6 @@
 import re
 import json
 
-
 def filter_columns(mongo_data, ignore_columns):
     
     for i in ignore_columns:
@@ -20,7 +19,7 @@ def handle_columns(mongo_data, columns):
                 mongo_data[col] = None
             else:
                 yield col
-
+    
     more_columns = set(mongo_data.keys()) - set(columns.keys())
 
     short_columns = set(columns.keys()) - set(mongo_data.keys())
@@ -107,7 +106,7 @@ def handle_data(data, columns):
     def _handle(data, columns):
         fault_types = set()
         for column_name, column_info in columns.items():
-            if data[column_name] is None:
+            if data[column_name] is None and columns[column_name]["nullable"]:
                 continue
             column_type = column_info["type"]
             func = type_trans_func.get(column_type) or _get_trans_func(column_type)
@@ -121,7 +120,6 @@ def handle_data(data, columns):
                     continue
 
                 data[column_name] = func(data[column_name])
-
                 if compare_type(data[column_name], column_type):
                     continue
 

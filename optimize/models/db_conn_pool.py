@@ -1,22 +1,24 @@
+
+
 import pymysql
-from collections import deque
+from queue import Queue
 
 
 class Conn_pool(object):
     __p = None
 
     def __init__(
-        self, host=None, port=None, user=None, passwd=None, db=None, maxconn=5
+        self, host=None, port=None, user=None, passwd=None, db=None, maxconn=5,charset=None
     ):
         self.maxconn = maxconn
-        self.pool = deque(maxlen=maxconn)
+        self.pool = Queue(maxconn)
         for i in range(maxconn):
             try:
                 conn = pymysql.connect(
-                    host=host, port=port, user=user, passwd=passwd, db=db
+                    host=host, port=port, user=user, passwd=passwd, db=db, charset=charset
                 )
                 conn.autocommit(True)
-                self.pool.append(conn)
+                self.pool.put(conn)
             except Exception as e:
                 raise IOError(e)
 
@@ -31,43 +33,34 @@ class Conn_pool(object):
 
     def select_sql(self, sql):
         try:
-            conn = self.pool.pop()
+            conn = self.pool.get()
             with conn.cursor(pymysql.cursors.DictCursor) as cur:
                 response = cur.execute(sql)
                 data = cur.fetchone()
             return response, data
+
         finally:
-            self.pool.append(conn)
-            
+            self.pool.put(conn)
 
     def exec_sql(self, sql, arg=None):
         try:
-            conn = self.pool.pop()
+            conn = self.pool.get()
             with conn.cursor() as cur:
                 response = cur.execute(sql, arg) if arg else cur.execute(sql)
             return response
 
         finally:
-            self.pool.append(conn)
-    def exec_sql_many(self,sql,operation=None):
-        """
-            执行多个sql，主要是insert into 多条数据的时候
-        """
+            self.pool.put(conn)
+
+    def exec_sql_many(self,sql,operation):
         try:
-            conn=self.pool.pop()
-            cursor=conn.cursor()
-            response=cursor.executemany(sql,operation) if operation else cursor.executemany(sql)
-        except Exception as e:
-            print(e)
-            cursor.close()
-            self.pool.append(conn)
-        else:
-            cursor.close()
-            self.pool.append(conn)
+            conn=self.pool.get()
+            with conn.cursor() as cur:
+                response=cur.executemany(sql,operation)
             return response
+        finally:
+            self.pool.put(conn)
 
     def close_conn(self):
         for i in range(self.maxconn):
-            self.pool.pop().close()
-
-
+            self.pool.get().close()

@@ -48,7 +48,7 @@ def query_data(table_name, table_poll_info, loop ):
     return _get_result(skip,loop)
 
 async def gen_data(table_name, table_info, table_poll_info, q, loop, fault_fp):
-    for result in query_data(table_name, table_poll_info, q, loop):
+    for result in query_data(table_name, table_poll_info, loop):
         await q.join()
         for row in result:
             row = row._attributes
@@ -71,9 +71,10 @@ async def handle_data(table_name, q, conn, loop, fault_fp):
         #
         data = await q.pop()
         extra,mysql_data = conn.select_sql('select * from {0} where object_id={1}'.format(table_name,data["object_id"]))
+        sql = gen_inserted_sql(table_name,data.keys())
+        
         if extra:
             sql,data = compile_data(table_name, data, mysql_data)
-        sql = gen_inserted_sql(table_name,data.keys())
         try:
             await loop.run_in_executor(None, conn.exec_sql,sql, data)
         except Exception:

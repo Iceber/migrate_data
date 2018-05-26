@@ -2,7 +2,7 @@ import sys
 import os.path
 sys.path.append("../")
 
-from libs.tables_info import combine_config, gen_table_info,\
+from libs.tables_info import  gen_table_info,\
                  storage_table_info,get_tables_config
 from models.mongodb import MongoTable
 from migrate_data import migrate_data
@@ -14,7 +14,8 @@ def main(args):
     if args.total != 1:
         # 由于GoldLog表过大
         # 如果运行多个实例，需要一个实例来单独运行GoldLog表
-        ignore_tables.extend(["GoldLog"])
+#        ignore_tables.extend(["GoldLog"])
+        pass
     if args.table is None:
         for i, t in enumerate(MongoTable.iter_tables(args.dir)):
             if t.name in ignore_tables or i not in range(args.count, 1000, args.total):
@@ -22,7 +23,7 @@ def main(args):
 
             try:
                 table_info = gen_table_info(t, config)
-                storage_table_info(t, table_info)
+#                storage_table_info(t, table_info)
                 migrate_data(args, t, table_info)
 
             except Exception as e:
@@ -38,7 +39,7 @@ def main(args):
         t = MongoTable.get_table(p)
         print(t.name)
         table_info = gen_table_info(t, config)
-        storage_table_info(t, table_info)
+#        storage_table_info(t, table_info)
         migrate_data(args, t, table_info)
 
 
@@ -49,7 +50,7 @@ class Args():
 
         self.config = "/home/pybeef/workspace/leancloud-backup/gen_schema_config.yml"
         self.migrate_config = "/home/pybeef/workspace/leancloud-backup/data_migration_config.yml"
-        self.table = "Product"
+        self.table = "GoldLog"
         self.data_dir = "/home/pybeef/workspace/dump_data/"
         self.fault_dir = "/home/pybeef/err_table/"
         self.test = True
