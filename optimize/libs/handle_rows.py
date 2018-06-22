@@ -14,3 +14,6 @@ def handle_row(row,table_info,test = False):
     if test or any(fault_columns.values()):
         return (fault_columns,)
     return row
+
+def filter_data():
+    pass

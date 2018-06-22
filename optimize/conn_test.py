@@ -16,7 +16,7 @@ class Conn_pool(object):
 
             
         
-   def get_conn():
-        conn = self.pool.get()
-        return conn.cursor()
+   @classmethod
+   def get_pool(cls, *args, **kwargs):
+       
         

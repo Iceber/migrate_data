@@ -42,7 +42,7 @@ def query_data(table_name, table_poll_info, loop ):
             table_poll_info['time_interval'] /= 2
             skip += 1
             yield from _get_result(query,skip)
-        elif skip == 0  and len(result) < result_count / 2 : 
+        elif skip == 0  and len(result) < result_count / 2 and table_poll_info['time_interval'] <= max_interval / 2: 
             table_poll_info['time_interval'] *= 2
 
     return _get_result(skip,loop)
@@ -62,6 +62,7 @@ async def gen_data(table_name, table_info, table_poll_info, q, loop, fault_fp):
 
 def compile_data(table_name, data, mysql_data):
     update_data = {name: value for name,value in data.items() if mysql_data[name]!= value}
+
     sql = gen_updated_sql(table_name, update_data.keys())
     update_data['object_id'] = data['object_id']
     return sql, update_data

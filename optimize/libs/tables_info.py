@@ -38,13 +38,13 @@ def storage_table_info(t, table_info):
             column.set("table", table)
             yield column
 
-    Tables = leancloud.Object.extend("migrate_tables")
+#    Tables = leancloud.Object.extend("migrate_tables")
     table = Tables()
     table.set("mongo_table_name", t.name)
     table.set("name", t.table_info["name"])
     table.set("ignore_columns", table_info["ignore_columns"])
 
-    Columns = leancloud.Object.extend("migrate_columns")
+#    Columns = leancloud.Object.extend("migrate_columns")
     try:
         leancloud.Object.save_all(list(gen_col()))
     except Exception as e:
